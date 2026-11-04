@@ -1,197 +1,192 @@
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Trading Platform</title>
+  <title>ApexTrader | Professional Crypto Platform</title>
+  <!-- Tailwind CSS for Modern Styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- TradingView Lightweight Charts Library -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #1e293b; padding: 10px 15px; border-radius: 8px; }
-    .banner { width: 100%; height: 160px; background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; }
-    .pair-card { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; cursor: pointer; }
-    .pair-price { font-weight: bold; color: #22c55e; }
-    .card { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
-    button { padding: 10px 15px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer; margin-right: 5px; font-weight: bold; }
-    input { padding: 10px; margin: 8px 0; width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 4px; }
-    .timer { font-size: 20px; font-weight: bold; color: #f59e0b; margin-top: 10px; }
-    .modal { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
+    }
+    .glow-card { animation: pulseGlow 4s infinite ease-in-out; }
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="nav">
-      <h2>CryptoX</h2>
-      <div>
-        <span id="userDisplay" style="margin-right: 10px;">Not Logged In</span>
-        <span id="userBalance" style="margin-right: 10px; color: #22c55e; font-weight: bold;"></span>
-        <button id="authBtn" onclick="toggleAuthModal()">Login / Register</button>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Navigation Bar -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+        <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
       </div>
+      <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">ApexTrader</span>
     </div>
 
-    <!-- Admin Controllable Banner Ad -->
-    <div id="adBanner" class="banner" style="background-image: url('https://via.placeholder.com/800x160?text=Special+Crypto+Bonus');">
-      <h3 id="adTitle" style="background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 4px; margin: 0;">Welcome Bonus Available!</h3>
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex flex-col text-right">
+        <span class="text-xs text-slate-400">Available Balance</span>
+        <span id="userBalance" class="text-emerald-400 font-bold text-lg">$0.00</span>
+      </div>
+      <button id="authBtn" onclick="toggleAuthModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all duration-200 font-semibold shadow-lg shadow-blue-600/20 text-sm">
+        Login / Register
+      </button>
     </div>
+  </header>
 
-    <!-- Auth Modal / Box -->
-    <div id="authBox" class="modal" style="display:none;">
-      <h3 id="authTitle">User Login</h3>
-      <input type="email" id="authEmail" placeholder="Enter your email">
-      <input type="password" id="authPassword" placeholder="Enter password">
-      <button onclick="handleAuthSubmit()" style="background: #22c55e; width: 100%;">Submit</button>
-      <p style="text-align: center; cursor: pointer; color: #3b82f6;" onclick="switchAuthMode()">Need an account? Register here</p>
-    </div>
-
-    <!-- Wallet Deposit / Withdraw Panel -->
-    <div id="walletBox" class="card">
-      <h3>Wallet & Funds</h3>
-      <p>Deposit Money (Manual Request to Admin):</p>
-      <input type="number" id="depositAmount" placeholder="Amount to deposit ($)">
-      <button onclick="requestDeposit()" style="background: #10b981;">Request Deposit</button>
-      
-      <hr style="border-color: #334155; margin: 20px 0;">
-      
-      <p>Withdraw Funds:</p>
-      <input type="text" id="withdrawAddress" placeholder="Enter Crypto Wallet / Bank Address">
-      <input type="number" id="withdrawAmount" placeholder="Amount to withdraw ($)">
-      <button onclick="requestWithdraw()" style="background: #ef4444;">Request Withdrawal</button>
-    </div>
-
-    <h3>Live Trading Pairs</h3>
-    <div id="pairsContainer"></div>
-
-    <!-- Trade Section -->
-    <div id="tradeBox" class="card">
-      <h3 id="selectedPairTitle">Trade</h3>
-      <p>Current Balance: <span id="tradeBalanceDisplay" style="color: #22c55e; font-weight: bold;">$0.00</span></p>
-      <label>Investment Amount ($):</label>
-      <input type="number" id="tradeAmount" value="10" min="1">
-      
-      <label>Duration:</label><br><br>
-      <button onclick="setDuration(30)">30s</button>
-      <button onclick="setDuration(60)">60s</button>
-      <button onclick="setDuration(120)">120s</button>
-      <p>Selected Timer: <span id="selectedDurationDisplay">30</span> seconds</p>
-
-      <button style="background: #10b981; width: 48%;" onclick="executeTrade('up')">Call (UP)</button>
-      <button style="background: #ef4444; width: 48%;" onclick="executeTrade('down')">Put (DOWN)</button>
-
-      <div id="animationBox" style="display:none; text-align: center; background: #0f172a; padding: 15px; margin-top: 15px; border-radius: 6px;">
-        <p>📊 Market order executing... Please wait...</p>
-        <p class="timer">Time Remaining: <span id="countdown">30</span>s</p>
+  <!-- Banner Ads Section -->
+  <div class="max-w-7xl mx-auto px-4 mt-6">
+    <div id="adBanner" class="relative rounded-2xl overflow-hidden h-40 bg-gradient-to-r from-blue-900/60 to-purple-900/60 border border-slate-800 flex items-center px-8 shadow-2xl">
+      <div class="relative z-10">
+        <span class="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full border border-blue-500/30">SPECIAL PROMO</span>
+        <h2 id="adTitle" class="text-2xl font-bold mt-2 text-white">Get Up To 100% Deposit Bonus</h2>
+        <p class="text-slate-300 text-sm mt-1">Trade BTC, ETH, and SOL with 0% maker fees.</p>
       </div>
     </div>
   </div>
 
-  <script>
-    // Load dynamic ads saved from admin panel
-    window.onload = function() {
-      const savedAdUrl = localStorage.getItem('admin_ad_url');
-      const savedAdText = localStorage.getItem('admin_ad_text');
-      if (savedAdUrl) document.getElementById('adBanner').style.backgroundImage = `url('${savedAdUrl}')`;
-      if (savedAdText) document.getElementById('adTitle').innerText = savedAdText;
-      checkUserSession();
-    };
+  <!-- Main Trading Dashboard -->
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    let isLoginMode = true;
-    let currentUser = localStorage.getItem('current_user') || null;
-    let currentBalance = parseFloat(localStorage.getItem('user_balance') || '100.00');
-    let selectedDuration = 30;
-    let selectedPair = 'BTC/USDT';
-
-    const pairs = [
-      { pair: 'BTC/USDT', price: 65000.00 },
-      { pair: 'ETH/USDT', price: 3500.00 },
-      { pair: 'SOL/USDT', price: 145.00 }
-    ];
-
-    function renderPairs() {
-      const container = document.getElementById('pairsContainer');
-      container.innerHTML = '';
-      pairs.forEach((p) => {
-        p.price += (Math.random() - 0.49) * (p.price * 0.001);
-        container.innerHTML += `
-          <div class="pair-card" onclick="openTrade('${p.pair}')">
-            <span><strong>${p.pair}</strong></span>
-            <span class="pair-price">$${p.price.toFixed(2)}</span>
-          </div>
-        `;
-      });
-    }
-    setInterval(renderPairs, 2000);
-    renderPairs();
-
-    function toggleAuthModal() {
-      const box = document.getElementById('authBox');
-      box.style.display = box.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function switchAuthMode() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('authTitle').innerText = isLoginMode ? 'User Login' : 'User Registration';
-    }
-
-    function handleAuthSubmit() {
-      const email = document.getElementById('authEmail').value;
-      if (!email) return alert('Please enter an email');
+    <!-- Left/Center Column: Live Interactive Chart & Pairs -->
+    <div class="lg:col-span-2 space-y-6">
       
-      currentUser = email;
-      localStorage.setItem('current_user', currentUser);
-      document.getElementById('authBox').style.display = 'none';
-      checkUserSession();
-      alert(isLoginMode ? 'Logged in successfully!' : 'Account created successfully!');
-    }
+      <!-- Real-Time Chart Container -->
+      <div class="glass-panel rounded-2xl p-4 border border-slate-800 shadow-xl">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <h3 id="chartPairTitle" class="text-xl font-bold text-white">BTC / USDT</h3>
+            <span id="livePriceHeader" class="text-lg font-bold text-emerald-400">$0.00</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="setPair('BTCUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">BTC</button>
+            <button onclick="setPair('ETHUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">ETH</button>
+            <button onclick="setPair('SOLUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">SOL</button>
+          </div>
+        </div>
+        <!-- TradingView Graphic Canvas Holder -->
+        <div id="tradingChart" class="w-full h-[400px] rounded-xl overflow-hidden"></div>
+      </div>
 
-    function checkUserSession() {
-      if (currentUser) {
-        document.getElementById('userDisplay').innerText = currentUser;
-        document.getElementById('userBalance').innerText = `$${currentBalance.toFixed(2)}`;
-        document.getElementById('tradeBalanceDisplay').innerText = `$${currentBalance.toFixed(2)}`;
-        document.getElementById('authBtn').innerText = 'Logout';
-        document.getElementById('authBtn').setAttribute('onclick', 'logout()');
-        document.getElementById('walletBox').style.display = 'block';
-      } else {
-        document.getElementById('userDisplay').innerText = 'Not Logged In';
-        document.getElementById('userBalance').innerText = '';
-        document.getElementById('authBtn').innerText = 'Login / Register';
-        document.getElementById('authBtn').setAttribute('onclick', 'toggleAuthModal()');
-        document.getElementById('walletBox').style.display = 'none';
-        document.getElementById('tradeBox').style.display = 'none';
+      <!-- Live Market Pairs Table -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <h3 class="text-lg font-bold mb-4 text-slate-200">Live Crypto Markets</h3>
+        <div class="space-y-3" id="pairsContainer"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Investment Controls Panel -->
+    <div class="space-y-6">
+      <div class="glass-panel rounded-2xl p-6 border border-slate-800 shadow-xl glow-card">
+        <h3 class="text-xl font-bold text-white mb-4">Quick Trade</h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs text-slate-400 font-medium">Investment Amount ($)</label>
+            <input type="number" id="tradeAmount" value="50" min="1" class="w-full mt-1 px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 text-white font-semibold">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 font-medium">Expiration Time</label>
+            <div class="grid grid-cols-3 gap-2 mt-1">
+              <button onclick="setDuration(30)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">30s</button>
+              <button onclick="setDuration(60)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">60s</button>
+              <button onclick="setDuration(120)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">120s</button>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Selected Duration: <span id="selectedDurationDisplay" class="text-blue-400 font-bold">30</span>s</p>
+          </div>
+
+          <!-- Trade Actions -->
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <button onclick="executeTrade('up')" class="py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all">
+              Call (UP)
+            </button>
+            <button onclick="executeTrade('down')" class="py-3.5 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 transition-all">
+              Put (DOWN)
+            </button>
+          </div>
+
+          <!-- Timer & Trade Execution Progress -->
+          <div id="animationBox" class="hidden p-4 rounded-xl bg-slate-900 border border-blue-500/40 text-center space-y-2 mt-4">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+            <p class="text-sm text-slate-300 font-medium">Order Executed. Waiting for Expiration...</p>
+            <p class="text-2xl font-extrabold text-amber-400" id="countdown">30s</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    let chart, candlestickSeries;
+    let currentPair = 'BTCUSDT';
+    let selectedDuration = 30;
+    let userBalance = parseFloat(localStorage.getItem('user_balance') || '500.00');
+
+    // 1. Initialize Real TradingView Graphic Chart
+    function initChart() {
+      const chartElement = document.getElementById('tradingChart');
+      chart = LightweightCharts.createChart(chartElement, {
+        layout: { backgroundColor: '#0f172a', textColor: '#94a3b8' },
+        grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        priceScale: { borderColor: '#334155' },
+        timeScale: { borderColor: '#334155', timeVisible: true, secondsVisible: true }
+      });
+
+      candlestickSeries = chart.addCandlestickSeries({
+        upColor: '#10b981', downColor: '#ef4444', borderDownColor: '#ef4444',
+        borderUpColor: '#10b981', wickDownColor: '#ef4444', wickUpColor: '#10b981'
+      });
+
+      // Generate seed candlestick data
+      let data = [];
+      let baseTime = Math.floor(Date.now() / 1000) - 3000;
+      let price = 65000;
+      for (let i = 0; i < 100; i++) {
+        let open = price + (Math.random() - 0.5) * 50;
+        let high = open + Math.random() * 30;
+        let low = open - Math.random() * 30;
+        let close = (high + low) / 2;
+        data.push({ time: baseTime + i * 30, open, high, low, close });
+        price = close;
       }
+      candlestickSeries.setData(data);
     }
 
-    function logout() {
-      localStorage.removeItem('current_user');
-      currentUser = null;
-      checkUserSession();
-      alert('Logged out successfully');
+    // 2. Connect Real Live Market Stream via WebSocket API
+    function connectLiveFeed() {
+      const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${currentPair.toLowerCase()}@ticker`);
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const livePrice = parseFloat(data.c);
+        document.getElementById('livePriceHeader').innerText = `$${livePrice.toFixed(2)}`;
+
+        // Update real chart graphics candle smoothly
+        candlestickSeries.update({
+          time: Math.floor(Date.now() / 1000),
+          open: livePrice - 5,
+          high: livePrice + 10,
+          low: livePrice - 10,
+          close: livePrice
+        });
+      };
     }
 
-    function requestDeposit() {
-      const amt = document.getElementById('depositAmount').value;
-      if (!amt) return alert('Enter deposit amount');
-      // Saves the deposit request so it can show in admin.html later
-      localStorage.setItem('pending_deposit', JSON.stringify({user: currentUser, amount: amt}));
-      alert('Deposit request submitted to Admin! Waiting for manual approval.');
-    }
-
-    function requestWithdraw() {
-      const amt = document.getElementById('withdrawAmount').value;
-      const addr = document.getElementById('withdrawAddress').value;
-      if (!amt || !addr) return alert('Fill out all fields');
-      if (amt > currentBalance) return alert('Insufficient balance!');
-      currentBalance -= parseFloat(amt);
-      localStorage.setItem('user_balance', currentBalance);
-      checkUserSession();
-      alert('Withdrawal requested successfully. Admin will process it.');
-    }
-
-    function openTrade(pair) {
-      if (!currentUser) return alert('Please login first to trade!');
-      selectedPair = pair;
-      document.getElementById('selectedPairTitle').innerText = 'Trade ' + pair;
-      document.getElementById('tradeBox').style.display = 'block';
+    function setPair(pair) {
+      currentPair = pair;
+      document.getElementById('chartPairTitle').innerText = pair.replace('USDT', ' / USDT');
+      connectLiveFeed();
     }
 
     function setDuration(sec) {
@@ -201,43 +196,48 @@
 
     function executeTrade(direction) {
       const amount = parseFloat(document.getElementById('tradeAmount').value);
-      if (amount > currentBalance) return alert("Insufficient balance!");
+      if (amount > userBalance) return alert("Insufficient account balance!");
 
-      currentBalance -= amount;
-      updateUIBalance();
-      
+      userBalance -= amount;
+      updateBalanceDisplay();
+
       const animBox = document.getElementById('animationBox');
       const countDisplay = document.getElementById('countdown');
-      animBox.style.display = 'block';
+      animBox.classList.remove('hidden');
       let timeLeft = selectedDuration;
 
       const timer = setInterval(() => {
         timeLeft--;
-        countDisplay.innerText = timeLeft;
+        countDisplay.innerText = `${timeLeft}s`;
+
         if (timeLeft <= 0) {
           clearInterval(timer);
-          animBox.style.display = 'none';
-          
-          // Controlled by admin panel setting (WIN or LOSS)
-          const forcedOutcome = localStorage.getItem('admin_outcome_mode') || 'WIN'; 
-          
+          animBox.classList.add('hidden');
+
+          // Controlled via admin.html outcome mode
+          const forcedOutcome = localStorage.getItem('admin_outcome_mode') || 'WIN';
           if (forcedOutcome === 'WIN') {
-            const winAmount = amount * 1.85;
-            currentBalance += winAmount;
-            alert(`🎉 Trade Won! Profit added: +$${winAmount.toFixed(2)}`);
+            const profit = amount * 1.85;
+            userBalance += profit;
+            alert(`🎉 Trade Successful! Return: +$${profit.toFixed(2)}`);
           } else {
-            alert(`❌ Trade Lost! Amount deducted: -$${amount.toFixed(2)}`);
+            alert(`❌ Market Order Expired Loss: -$${amount.toFixed(2)}`);
           }
-          updateUIBalance();
+          updateBalanceDisplay();
         }
       }, 1000);
     }
 
-    function updateUIBalance() {
-      localStorage.setItem('user_balance', currentBalance);
-      document.getElementById('userBalance').innerText = `$${currentBalance.toFixed(2)}`;
-      document.getElementById('tradeBalanceDisplay').innerText = `$${currentBalance.toFixed(2)}`;
+    function updateBalanceDisplay() {
+      localStorage.setItem('user_balance', userBalance);
+      document.getElementById('userBalance').innerText = `$${userBalance.toFixed(2)}`;
     }
+
+    window.onload = () => {
+      initChart();
+      connectLiveFeed();
+      updateBalanceDisplay();
+    };
   </script>
 </body>
 </html>
