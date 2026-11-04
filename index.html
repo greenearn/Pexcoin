@@ -4,220 +4,118 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ApexTrader | Global Trading Platform</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- TradingView Lightweight Charts -->
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-panel { background: rgba(15, 23, 42, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased pb-12">
 
   <!-- Navigation Bar -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-6 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
-        <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
-      </div>
-      <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">ApexTrader</span>
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold">📈</div>
+      <span class="text-lg font-bold text-white">ApexTrader</span>
     </div>
-
-    <div class="flex items-center gap-4">
-      <div class="hidden md:flex flex-col text-right">
-        <span class="text-xs text-slate-400">Balance</span>
-        <span id="userBalance" class="text-emerald-400 font-bold text-lg">$0.00</span>
-      </div>
-      <button id="authBtn" onclick="toggleAuthModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all font-semibold shadow-lg shadow-blue-600/20 text-sm">
-        Login / Register
-      </button>
+    <div class="flex items-center gap-2">
+      <span id="userBalance" class="text-emerald-400 font-bold text-sm">$250.00</span>
+      <button id="authBtn" onclick="toggleAuthModal()" class="px-3 py-1.5 rounded-lg bg-blue-600 font-semibold text-xs">Login</button>
     </div>
   </header>
 
-  <!-- Banner Ads Section -->
-  <div class="max-w-7xl mx-auto px-4 mt-6">
-    <div id="adBanner" class="relative rounded-2xl overflow-hidden h-40 bg-gradient-to-r from-blue-900/60 to-purple-900/60 border border-slate-800 flex items-center px-8 shadow-2xl">
-      <div class="relative z-10">
-        <span class="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full border border-blue-500/30">SPECIAL PROMO</span>
-        <h2 id="adTitle" class="text-2xl font-bold mt-2 text-white">Get Up To 100% Deposit Bonus</h2>
-        <p class="text-slate-300 text-sm mt-1">Trade BTC, ETH, and SOL instantly.</p>
-      </div>
-    </div>
-  </div>
+  <div class="max-w-md mx-auto p-4 space-y-4">
 
-  <!-- Referral Code Notice Box (Shows if user opened link with ?invite=CODE) -->
-  <div id="inviteBanner" class="max-w-7xl mx-auto px-4 mt-4 hidden">
-    <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center justify-between">
-      <span>🎁 You were invited by referral code: <strong id="invitedByCode" class="text-white"></strong></span>
+    <!-- Promo Banner -->
+    <div id="adBanner" class="rounded-2xl p-4 bg-gradient-to-r from-blue-900 to-indigo-900 border border-slate-800">
+      <span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-full">PROMO</span>
+      <h2 id="adTitle" class="text-lg font-bold mt-1 text-white">Get Up To 100% Deposit Bonus</h2>
     </div>
-  </div>
 
-  <!-- Auth Modal Box -->
-  <div id="authBox" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden">
-    <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-slate-800 shadow-2xl space-y-4">
+    <!-- Auth Modal / Box -->
+    <div id="authBox" class="glass-panel p-4 rounded-2xl border border-slate-800 hidden space-y-3">
+      <h3 id="authTitle" class="text-md font-bold text-white">User Login</h3>
+      <input type="email" id="authEmail" placeholder="Email Address" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
+      <input type="password" id="authPassword" placeholder="Password" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
+      <button onclick="handleAuthSubmit()" class="w-full py-2 bg-emerald-500 font-bold text-white rounded-lg text-sm">Submit</button>
+      <p class="text-center text-xs text-blue-400 cursor-pointer" onclick="switchAuthMode()">Switch Login/Register</p>
+    </div>
+
+    <!-- Interactive Price & Canvas Chart Card -->
+    <div class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-3">
       <div class="flex justify-between items-center">
-        <h3 id="authTitle" class="text-xl font-bold text-white">User Login</h3>
-        <button onclick="toggleAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div>
+          <h3 id="chartPairTitle" class="text-base font-bold text-white">BTC / USDT</h3>
+          <span id="livePriceHeader" class="text-xl font-bold text-emerald-400">$65,000.00</span>
+        </div>
+        <div class="flex gap-1">
+          <button onclick="setPair('BTCUSDT', 65000)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">BTC</button>
+          <button onclick="setPair('ETHUSDT', 3500)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">ETH</button>
+          <button onclick="setPair('SOLUSDT', 145)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">SOL</button>
+        </div>
       </div>
-      <input type="email" id="authEmail" placeholder="Email Address" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500">
-      <input type="password" id="authPassword" placeholder="Password" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500">
-      <button onclick="handleAuthSubmit()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all">Submit</button>
-      <p class="text-center text-xs text-slate-400 cursor-pointer hover:text-blue-400" onclick="switchAuthMode()">Need an account? Register here</p>
+      
+      <!-- Custom Smooth Live Canvas Chart -->
+      <div class="w-full h-48 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-800">
+        <canvas id="priceCanvas" class="w-full h-full"></canvas>
+      </div>
     </div>
+
+    <!-- Trading Control Panel -->
+    <div class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-3">
+      <h3 class="text-md font-bold text-white">Quick Trade</h3>
+      
+      <div>
+        <label class="text-xs text-slate-400">Investment Amount ($)</label>
+        <input type="number" id="tradeAmount" value="20" class="w-full mt-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm font-bold">
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400">Duration</label>
+        <div class="grid grid-cols-3 gap-2 mt-1">
+          <button onclick="setDuration(30)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-blue-400">30s</button>
+          <button onclick="setDuration(60)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-300">60s</button>
+          <button onclick="setDuration(120)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-300">120s</button>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Timer: <span id="selectedDurationDisplay" class="text-blue-400 font-bold">30</span>s</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="executeTrade('up')" class="py-3 bg-emerald-500 text-white font-bold rounded-xl text-sm shadow-lg">Call (UP)</button>
+        <button onclick="executeTrade('down')" class="py-3 bg-rose-500 text-white font-bold rounded-xl text-sm shadow-lg">Put (DOWN)</button>
+      </div>
+
+      <div id="animationBox" class="hidden p-3 rounded-xl bg-slate-900 border border-blue-500/40 text-center space-y-1">
+        <p class="text-xs text-slate-300">Contract running...</p>
+        <p class="text-lg font-extrabold text-amber-400" id="countdown">30s</p>
+      </div>
+    </div>
+
+    <!-- Wallet & Deposit Section -->
+    <div id="walletBox" class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-2 hidden">
+      <h3 class="text-sm font-bold text-white">Manual Deposit</h3>
+      <input type="number" id="depositAmount" placeholder="Amount to deposit" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+      <button onclick="requestDeposit()" class="w-full py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Submit Deposit</button>
+    </div>
+
   </div>
-
-  <!-- Main Trading Dashboard -->
-  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    <!-- Center Chart & Markets Column -->
-    <div class="lg:col-span-2 space-y-6">
-      <div class="glass-panel rounded-2xl p-4 border border-slate-800 shadow-xl">
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-3">
-            <h3 id="chartPairTitle" class="text-xl font-bold text-white">BTC / USDT</h3>
-            <span id="livePriceHeader" class="text-lg font-bold text-emerald-400">$0.00</span>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="setPair('BTCUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">BTC</button>
-            <button onclick="setPair('ETHUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">ETH</button>
-            <button onclick="setPair('SOLUSDT')" class="px-3 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">SOL</button>
-          </div>
-        </div>
-        <div id="tradingChart" class="w-full h-[380px] rounded-xl overflow-hidden"></div>
-      </div>
-
-      <!-- Wallet Deposit / Withdraw Panel -->
-      <div id="walletBox" class="glass-panel rounded-2xl p-6 border border-slate-800 hidden space-y-4">
-        <h3 class="text-lg font-bold text-white">Wallet Management</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="text-xs text-slate-400">Request Deposit ($)</label>
-            <input type="number" id="depositAmount" placeholder="Enter amount" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
-            <button onclick="requestDeposit()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-lg text-xs">Submit Deposit Request</button>
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs text-slate-400">Withdraw Funds ($)</label>
-            <input type="text" id="withdrawAddress" placeholder="Wallet Address / Upi" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
-            <input type="number" id="withdrawAmount" placeholder="Amount" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm mt-1">
-            <button onclick="requestWithdraw()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 font-semibold rounded-lg text-xs">Request Withdrawal</button>
-          </div>
-        </div>
-        <div class="pt-2 border-t border-slate-800">
-          <p class="text-xs text-slate-400">Your Referral Link to invite friends:</p>
-          <input type="text" id="myReferralLink" readonly class="w-full mt-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-blue-400 text-xs font-mono">
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Column: Trade Controls -->
-    <div class="space-y-6">
-      <div class="glass-panel rounded-2xl p-6 border border-slate-800 shadow-xl">
-        <h3 class="text-xl font-bold text-white mb-4">Quick Trade</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="text-xs text-slate-400 font-medium">Investment Amount ($)</label>
-            <input type="number" id="tradeAmount" value="20" min="1" class="w-full mt-1 px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 text-white font-semibold">
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 font-medium">Expiration Time</label>
-            <div class="grid grid-cols-3 gap-2 mt-1">
-              <button onclick="setDuration(30)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">30s</button>
-              <button onclick="setDuration(60)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">60s</button>
-              <button onclick="setDuration(120)" class="py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-sm font-semibold">120s</button>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">Selected Timer: <span id="selectedDurationDisplay" class="text-blue-400 font-bold">30</span>s</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 pt-2">
-            <button onclick="executeTrade('up')" class="py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20">Call (UP)</button>
-            <button onclick="executeTrade('down')" class="py-3.5 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20">Put (DOWN)</button>
-          </div>
-          <div id="animationBox" class="hidden p-4 rounded-xl bg-slate-900 border border-blue-500/40 text-center space-y-2 mt-4">
-            <div class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
-            <p class="text-xs text-slate-300">Processing contract... Expiration in:</p>
-            <p class="text-xl font-extrabold text-amber-400" id="countdown">30s</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
 
   <script>
-    lucide.createIcons();
-
-    let chart, candlestickSeries;
-    let currentPair = 'BTCUSDT';
+    let currentPrice = 65000.00;
     let selectedDuration = 30;
-    let isLoginMode = true;
-    let currentUser = localStorage.getItem('current_user') || null;
     let userBalance = parseFloat(localStorage.getItem('user_balance') || '250.00');
+    let currentUser = localStorage.getItem('current_user') || null;
+    let priceHistory = [];
 
-    // Handle Referral Link Parameter (e.g. ?invite=CODE)
     window.onload = function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const inviteCode = urlParams.get('invite');
-      if (inviteCode) {
-        localStorage.setItem('referred_by', inviteCode);
-        document.getElementById('inviteBanner').classList.remove('hidden');
-        document.getElementById('invitedByCode').innerText = inviteCode;
-      }
-
-      // Generate user's own unique referral link
-      const myRandomCode = currentUser ? currentUser.split('@')[0] : 'TRADER' + Math.floor(Math.random() * 9000 + 1000);
-      document.getElementById('myReferralLink').value = window.location.origin + window.location.pathname + '?invite=' + myRandomCode;
-
-      // Load admin ad banner overrides
-      if (localStorage.getItem('admin_ad_url')) document.getElementById('adBanner').style.backgroundImage = `url('${localStorage.getItem('admin_ad_url')}')`;
       if (localStorage.getItem('admin_ad_text')) document.getElementById('adTitle').innerText = localStorage.getItem('admin_ad_text');
-
-      initChart();
-      connectLiveFeed();
-      checkUserSession();
+      checkSession();
+      initCanvasChart();
     };
 
-    function initChart() {
-      const chartElement = document.getElementById('tradingChart');
-      chart = LightweightCharts.createChart(chartElement, {
-        layout: { backgroundColor: '#0f172a', textColor: '#94a3b8' },
-        grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
-        timeScale: { borderColor: '#334155', timeVisible: true, secondsVisible: true }
-      });
-      candlestickSeries = chart.addCandlestickSeries({
-        upColor: '#10b981', downColor: '#ef4444', borderDownColor: '#ef4444', borderUpColor: '#10b981'
-      });
-
-      let data = [];
-      let baseTime = Math.floor(Date.now() / 1000) - 3000;
-      let price = 65000;
-      for (let i = 0; i < 80; i++) {
-        let open = price + (Math.random() - 0.5) * 40;
-        let high = open + Math.random() * 25;
-        let low = open - Math.random() * 25;
-        let close = (high + low) / 2;
-        data.push({ time: baseTime + i * 30, open, high, low, close });
-        price = close;
-      }
-      candlestickSeries.setData(data);
-    }
-
-    function connectLiveFeed() {
-      const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${currentPair.toLowerCase()}@ticker`);
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        const livePrice = parseFloat(data.c);
-        document.getElementById('livePriceHeader').innerText = `$${livePrice.toFixed(2)}`;
-        candlestickSeries.update({
-          time: Math.floor(Date.now() / 1000),
-          open: livePrice - 3, high: livePrice + 8, low: livePrice - 8, close: livePrice
-        });
-      };
-    }
-
-    function setPair(pair) {
-      currentPair = pair;
+    function setPair(pair, basePrice) {
       document.getElementById('chartPairTitle').innerText = pair.replace('USDT', ' / USDT');
-      connectLiveFeed();
+      currentPrice = basePrice;
     }
 
     function setDuration(sec) {
@@ -230,30 +128,31 @@
       box.classList.toggle('hidden');
     }
 
+    let isLogin = true;
     function switchAuthMode() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('authTitle').innerText = isLoginMode ? 'User Login' : 'User Registration';
+      isLogin = !isLogin;
+      document.getElementById('authTitle').innerText = isLogin ? 'User Login' : 'User Registration';
     }
 
     function handleAuthSubmit() {
       const email = document.getElementById('authEmail').value;
-      if (!email) return alert('Enter email address');
+      if (!email) return alert('Enter email');
       currentUser = email;
       localStorage.setItem('current_user', currentUser);
       toggleAuthModal();
-      checkUserSession();
-      alert(isLoginMode ? 'Login successful!' : 'Account registered successfully!');
+      checkSession();
+      alert('Logged in successfully!');
     }
 
-    function checkUserSession() {
+    function checkSession() {
       if (currentUser) {
         document.getElementById('userBalance').innerText = `$${userBalance.toFixed(2)}`;
         document.getElementById('authBtn').innerText = 'Logout';
         document.getElementById('authBtn').setAttribute('onclick', 'logout()');
         document.getElementById('walletBox').classList.remove('hidden');
       } else {
-        document.getElementById('userBalance').innerText = '$0.00';
-        document.getElementById('authBtn').innerText = 'Login / Register';
+        document.getElementById('userBalance').innerText = '$250.00';
+        document.getElementById('authBtn').innerText = 'Login';
         document.getElementById('authBtn').setAttribute('onclick', 'toggleAuthModal()');
         document.getElementById('walletBox').classList.add('hidden');
       }
@@ -262,33 +161,22 @@
     function logout() {
       localStorage.removeItem('current_user');
       currentUser = null;
-      checkUserSession();
-      alert('Logged out successfully');
+      checkSession();
+      alert('Logged out');
     }
 
     function requestDeposit() {
       const amt = document.getElementById('depositAmount').value;
-      if (!amt) return alert('Enter deposit amount');
-      localStorage.setItem('pending_deposit', JSON.stringify({user: currentUser, amount: amt}));
-      alert('Deposit request sent to Admin panel!');
-    }
-
-    function requestWithdraw() {
-      const amt = document.getElementById('withdrawAmount').value;
-      if (!amt || amt > userBalance) return alert('Invalid amount or insufficient balance');
-      userBalance -= parseFloat(amt);
-      localStorage.setItem('user_balance', userBalance);
-      checkUserSession();
-      alert('Withdrawal request submitted successfully.');
+      if (!amt) return alert('Enter amount');
+      alert('Deposit request sent to admin panel!');
     }
 
     function executeTrade(direction) {
-      if (!currentUser) return alert('Please login first to place trades!');
       const amount = parseFloat(document.getElementById('tradeAmount').value);
       if (amount > userBalance) return alert('Insufficient balance!');
 
       userBalance -= amount;
-      updateBalance();
+      updateBal();
 
       const animBox = document.getElementById('animationBox');
       const countDisplay = document.getElementById('countdown');
@@ -302,23 +190,62 @@
           clearInterval(timer);
           animBox.classList.add('hidden');
 
-          // Fully controllable from admin panel (WIN or LOSS)
-          const forcedOutcome = localStorage.getItem('admin_outcome_mode') || 'WIN';
-          if (forcedOutcome === 'WIN') {
-            const winAmt = amount * 1.85;
-            userBalance += winAmt;
-            alert(`🎉 Trade Won! Payout added: +$${winAmt.toFixed(2)}`);
+          // Controlled via admin.html outcome mode (WIN or LOSS)
+          const mode = localStorage.getItem('admin_outcome_mode') || 'WIN';
+          if (mode === 'WIN') {
+            const win = amount * 1.85;
+            userBalance += win;
+            alert(`🎉 Trade Won! +$${win.toFixed(2)}`);
           } else {
             alert(`❌ Trade Lost: -$${amount.toFixed(2)}`);
           }
-          updateBalance();
+          updateBal();
         }
       }, 1000);
     }
 
-    function updateBalance() {
+    function updateBal() {
       localStorage.setItem('user_balance', userBalance);
       document.getElementById('userBalance').innerText = `$${userBalance.toFixed(2)}`;
+    }
+
+    // Smooth Canvas Chart Generator
+    function initCanvasChart() {
+      const canvas = document.getElementById('priceCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      for(let i=0; i<40; i++) {
+        currentPrice += (Math.random() - 0.48) * 15;
+        priceHistory.push(currentPrice);
+      }
+
+      setInterval(() => {
+        currentPrice += (Math.random() - 0.48) * 20;
+        priceHistory.push(currentPrice);
+        if (priceHistory.length > 40) priceHistory.shift();
+
+        document.getElementById('livePriceHeader').innerText = `$${currentPrice.toFixed(2)}`;
+
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        const max = Math.max(...priceHistory);
+        const min = Math.min(...priceHistory);
+        const range = max - min || 1;
+
+        priceHistory.forEach((p, idx) => {
+          const x = (idx / (priceHistory.length - 1)) * canvas.width;
+          const y = canvas.height - ((p - min) / range) * (canvas.height - 20) - 10;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }, 1000);
     }
   </script>
 </body>
