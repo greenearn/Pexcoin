@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,14 +7,15 @@
   <style>
     body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
     .container { max-width: 800px; margin: 0 auto; }
-    .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #1e293b; padding: 10px 15px; border-radius: 8px; }
     .banner { width: 100%; height: 160px; background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; }
     .pair-card { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; cursor: pointer; }
-    .pair-price { font-weight: bold; }
-    .trade-box { background: #1e293b; padding: 20px; border-radius: 8px; display: none; margin-top: 20px; }
-    button { padding: 10px 15px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer; margin-right: 5px; }
-    input { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-    .timer { font-size: 24px; font-weight: bold; color: #f59e0b; margin-top: 10px; }
+    .pair-price { font-weight: bold; color: #22c55e; }
+    .card { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
+    button { padding: 10px 15px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer; margin-right: 5px; font-weight: bold; }
+    input { padding: 10px; margin: 8px 0; width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 4px; }
+    .timer { font-size: 20px; font-weight: bold; color: #f59e0b; margin-top: 10px; }
+    .modal { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -22,46 +23,83 @@
     <div class="nav">
       <h2>CryptoX</h2>
       <div>
-        <span id="userBalance">Balance: $0.00</span>
-        <button id="loginBtn" onclick="toggleAuth()">Login / Register</button>
+        <span id="userDisplay" style="margin-right: 10px;">Not Logged In</span>
+        <span id="userBalance" style="margin-right: 10px; color: #22c55e; font-weight: bold;"></span>
+        <button id="authBtn" onclick="toggleAuthModal()">Login / Register</button>
       </div>
     </div>
 
-    <!-- Admin Controllable Banner -->
+    <!-- Admin Controllable Banner Ad -->
     <div id="adBanner" class="banner" style="background-image: url('https://via.placeholder.com/800x160?text=Special+Crypto+Bonus');">
-      <h3 id="adTitle" style="background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px;">Welcome Bonus Available!</h3>
+      <h3 id="adTitle" style="background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 4px; margin: 0;">Welcome Bonus Available!</h3>
+    </div>
+
+    <!-- Auth Modal / Box -->
+    <div id="authBox" class="modal" style="display:none;">
+      <h3 id="authTitle">User Login</h3>
+      <input type="email" id="authEmail" placeholder="Enter your email">
+      <input type="password" id="authPassword" placeholder="Enter password">
+      <button onclick="handleAuthSubmit()" style="background: #22c55e; width: 100%;">Submit</button>
+      <p style="text-align: center; cursor: pointer; color: #3b82f6;" onclick="switchAuthMode()">Need an account? Register here</p>
+    </div>
+
+    <!-- Wallet Deposit / Withdraw Panel -->
+    <div id="walletBox" class="card">
+      <h3>Wallet & Funds</h3>
+      <p>Deposit Money (Manual Request to Admin):</p>
+      <input type="number" id="depositAmount" placeholder="Amount to deposit ($)">
+      <button onclick="requestDeposit()" style="background: #10b981;">Request Deposit</button>
+      
+      <hr style="border-color: #334155; margin: 20px 0;">
+      
+      <p>Withdraw Funds:</p>
+      <input type="text" id="withdrawAddress" placeholder="Enter Crypto Wallet / Bank Address">
+      <input type="number" id="withdrawAmount" placeholder="Amount to withdraw ($)">
+      <button onclick="requestWithdraw()" style="background: #ef4444;">Request Withdrawal</button>
     </div>
 
     <h3>Live Trading Pairs</h3>
     <div id="pairsContainer"></div>
 
     <!-- Trade Section -->
-    <div id="tradeBox" class="trade-box">
+    <div id="tradeBox" class="card">
       <h3 id="selectedPairTitle">Trade</h3>
+      <p>Current Balance: <span id="tradeBalanceDisplay" style="color: #22c55e; font-weight: bold;">$0.00</span></p>
       <label>Investment Amount ($):</label>
       <input type="number" id="tradeAmount" value="10" min="1">
       
-      <label>Duration:</label><br>
+      <label>Duration:</label><br><br>
       <button onclick="setDuration(30)">30s</button>
       <button onclick="setDuration(60)">60s</button>
       <button onclick="setDuration(120)">120s</button>
-      <p>Selected Timer: <span id="selectedDurationDisplay">30</span>s</p>
+      <p>Selected Timer: <span id="selectedDurationDisplay">30</span> seconds</p>
 
-      <button style="background: #10b981;" onclick="executeTrade('up')">Call (UP)</button>
-      <button style="background: #ef4444;" onclick="executeTrade('down')">Put (DOWN)</button>
+      <button style="background: #10b981; width: 48%;" onclick="executeTrade('up')">Call (UP)</button>
+      <button style="background: #ef4444; width: 48%;" onclick="executeTrade('down')">Put (DOWN)</button>
 
-      <div id="animationBox" style="display:none;">
-        <p class="timer">Investing... Time Remaining: <span id="countdown">30</span>s</p>
+      <div id="animationBox" style="display:none; text-align: center; background: #0f172a; padding: 15px; margin-top: 15px; border-radius: 6px;">
+        <p>📊 Market order executing... Please wait...</p>
+        <p class="timer">Time Remaining: <span id="countdown">30</span>s</p>
       </div>
     </div>
   </div>
 
   <script>
-    let currentBalance = 100.00; // Loaded from database in production
+    // Load dynamic ads saved from admin panel
+    window.onload = function() {
+      const savedAdUrl = localStorage.getItem('admin_ad_url');
+      const savedAdText = localStorage.getItem('admin_ad_text');
+      if (savedAdUrl) document.getElementById('adBanner').style.backgroundImage = `url('${savedAdUrl}')`;
+      if (savedAdText) document.getElementById('adTitle').innerText = savedAdText;
+      checkUserSession();
+    };
+
+    let isLoginMode = true;
+    let currentUser = localStorage.getItem('current_user') || null;
+    let currentBalance = parseFloat(localStorage.getItem('user_balance') || '100.00');
     let selectedDuration = 30;
     let selectedPair = 'BTC/USDT';
-    
-    // Default trading pairs simulation
+
     const pairs = [
       { pair: 'BTC/USDT', price: 65000.00 },
       { pair: 'ETH/USDT', price: 3500.00 },
@@ -71,22 +109,86 @@
     function renderPairs() {
       const container = document.getElementById('pairsContainer');
       container.innerHTML = '';
-      pairs.forEach((p, idx) => {
-        // Natural market fluctuation simulation
+      pairs.forEach((p) => {
         p.price += (Math.random() - 0.49) * (p.price * 0.001);
         container.innerHTML += `
           <div class="pair-card" onclick="openTrade('${p.pair}')">
-            <span>${p.pair}</span>
+            <span><strong>${p.pair}</strong></span>
             <span class="pair-price">$${p.price.toFixed(2)}</span>
           </div>
         `;
       });
     }
-
     setInterval(renderPairs, 2000);
     renderPairs();
 
+    function toggleAuthModal() {
+      const box = document.getElementById('authBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function switchAuthMode() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('authTitle').innerText = isLoginMode ? 'User Login' : 'User Registration';
+    }
+
+    function handleAuthSubmit() {
+      const email = document.getElementById('authEmail').value;
+      if (!email) return alert('Please enter an email');
+      
+      currentUser = email;
+      localStorage.setItem('current_user', currentUser);
+      document.getElementById('authBox').style.display = 'none';
+      checkUserSession();
+      alert(isLoginMode ? 'Logged in successfully!' : 'Account created successfully!');
+    }
+
+    function checkUserSession() {
+      if (currentUser) {
+        document.getElementById('userDisplay').innerText = currentUser;
+        document.getElementById('userBalance').innerText = `$${currentBalance.toFixed(2)}`;
+        document.getElementById('tradeBalanceDisplay').innerText = `$${currentBalance.toFixed(2)}`;
+        document.getElementById('authBtn').innerText = 'Logout';
+        document.getElementById('authBtn').setAttribute('onclick', 'logout()');
+        document.getElementById('walletBox').style.display = 'block';
+      } else {
+        document.getElementById('userDisplay').innerText = 'Not Logged In';
+        document.getElementById('userBalance').innerText = '';
+        document.getElementById('authBtn').innerText = 'Login / Register';
+        document.getElementById('authBtn').setAttribute('onclick', 'toggleAuthModal()');
+        document.getElementById('walletBox').style.display = 'none';
+        document.getElementById('tradeBox').style.display = 'none';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('current_user');
+      currentUser = null;
+      checkUserSession();
+      alert('Logged out successfully');
+    }
+
+    function requestDeposit() {
+      const amt = document.getElementById('depositAmount').value;
+      if (!amt) return alert('Enter deposit amount');
+      // Saves the deposit request so it can show in admin.html later
+      localStorage.setItem('pending_deposit', JSON.stringify({user: currentUser, amount: amt}));
+      alert('Deposit request submitted to Admin! Waiting for manual approval.');
+    }
+
+    function requestWithdraw() {
+      const amt = document.getElementById('withdrawAmount').value;
+      const addr = document.getElementById('withdrawAddress').value;
+      if (!amt || !addr) return alert('Fill out all fields');
+      if (amt > currentBalance) return alert('Insufficient balance!');
+      currentBalance -= parseFloat(amt);
+      localStorage.setItem('user_balance', currentBalance);
+      checkUserSession();
+      alert('Withdrawal requested successfully. Admin will process it.');
+    }
+
     function openTrade(pair) {
+      if (!currentUser) return alert('Please login first to trade!');
       selectedPair = pair;
       document.getElementById('selectedPairTitle').innerText = 'Trade ' + pair;
       document.getElementById('tradeBox').style.display = 'block';
@@ -99,10 +201,10 @@
 
     function executeTrade(direction) {
       const amount = parseFloat(document.getElementById('tradeAmount').value);
-      if (amount > currentBalance) return alert("Insufficient funds!");
+      if (amount > currentBalance) return alert("Insufficient balance!");
 
       currentBalance -= amount;
-      document.getElementById('userBalance').innerText = `Balance: $${currentBalance.toFixed(2)}`;
+      updateUIBalance();
       
       const animBox = document.getElementById('animationBox');
       const countDisplay = document.getElementById('countdown');
@@ -116,23 +218,25 @@
           clearInterval(timer);
           animBox.style.display = 'none';
           
-          // Fetch admin setting: 'WIN' or 'LOSS'
+          // Controlled by admin panel setting (WIN or LOSS)
           const forcedOutcome = localStorage.getItem('admin_outcome_mode') || 'WIN'; 
           
           if (forcedOutcome === 'WIN') {
             const winAmount = amount * 1.85;
             currentBalance += winAmount;
-            alert(`Trade Won! +$${winAmount.toFixed(2)}`);
+            alert(`🎉 Trade Won! Profit added: +$${winAmount.toFixed(2)}`);
           } else {
-            alert(`Trade Lost! -$${amount.toFixed(2)}`);
+            alert(`❌ Trade Lost! Amount deducted: -$${amount.toFixed(2)}`);
           }
-          document.getElementById('userBalance').innerText = `Balance: $${currentBalance.toFixed(2)}`;
+          updateUIBalance();
         }
       }, 1000);
     }
 
-    function toggleAuth() {
-      alert("Login/Registration modal opens here (connect to Firebase Auth).");
+    function updateUIBalance() {
+      localStorage.setItem('user_balance', currentBalance);
+      document.getElementById('userBalance').innerText = `$${currentBalance.toFixed(2)}`;
+      document.getElementById('tradeBalanceDisplay').innerText = `$${currentBalance.toFixed(2)}`;
     }
   </script>
 </body>
