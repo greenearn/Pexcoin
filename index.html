@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Trading Platform</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .banner { width: 100%; height: 160px; background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; }
+    .pair-card { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; cursor: pointer; }
+    .pair-price { font-weight: bold; }
+    .trade-box { background: #1e293b; padding: 20px; border-radius: 8px; display: none; margin-top: 20px; }
+    button { padding: 10px 15px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+    input { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    .timer { font-size: 24px; font-weight: bold; color: #f59e0b; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <h2>CryptoX</h2>
+      <div>
+        <span id="userBalance">Balance: $0.00</span>
+        <button id="loginBtn" onclick="toggleAuth()">Login / Register</button>
+      </div>
+    </div>
+
+    <!-- Admin Controllable Banner -->
+    <div id="adBanner" class="banner" style="background-image: url('https://via.placeholder.com/800x160?text=Special+Crypto+Bonus');">
+      <h3 id="adTitle" style="background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px;">Welcome Bonus Available!</h3>
+    </div>
+
+    <h3>Live Trading Pairs</h3>
+    <div id="pairsContainer"></div>
+
+    <!-- Trade Section -->
+    <div id="tradeBox" class="trade-box">
+      <h3 id="selectedPairTitle">Trade</h3>
+      <label>Investment Amount ($):</label>
+      <input type="number" id="tradeAmount" value="10" min="1">
+      
+      <label>Duration:</label><br>
+      <button onclick="setDuration(30)">30s</button>
+      <button onclick="setDuration(60)">60s</button>
+      <button onclick="setDuration(120)">120s</button>
+      <p>Selected Timer: <span id="selectedDurationDisplay">30</span>s</p>
+
+      <button style="background: #10b981;" onclick="executeTrade('up')">Call (UP)</button>
+      <button style="background: #ef4444;" onclick="executeTrade('down')">Put (DOWN)</button>
+
+      <div id="animationBox" style="display:none;">
+        <p class="timer">Investing... Time Remaining: <span id="countdown">30</span>s</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentBalance = 100.00; // Loaded from database in production
+    let selectedDuration = 30;
+    let selectedPair = 'BTC/USDT';
+    
+    // Default trading pairs simulation
+    const pairs = [
+      { pair: 'BTC/USDT', price: 65000.00 },
+      { pair: 'ETH/USDT', price: 3500.00 },
+      { pair: 'SOL/USDT', price: 145.00 }
+    ];
+
+    function renderPairs() {
+      const container = document.getElementById('pairsContainer');
+      container.innerHTML = '';
+      pairs.forEach((p, idx) => {
+        // Natural market fluctuation simulation
+        p.price += (Math.random() - 0.49) * (p.price * 0.001);
+        container.innerHTML += `
+          <div class="pair-card" onclick="openTrade('${p.pair}')">
+            <span>${p.pair}</span>
+            <span class="pair-price">$${p.price.toFixed(2)}</span>
+          </div>
+        `;
+      });
+    }
+
+    setInterval(renderPairs, 2000);
+    renderPairs();
+
+    function openTrade(pair) {
+      selectedPair = pair;
+      document.getElementById('selectedPairTitle').innerText = 'Trade ' + pair;
+      document.getElementById('tradeBox').style.display = 'block';
+    }
+
+    function setDuration(sec) {
+      selectedDuration = sec;
+      document.getElementById('selectedDurationDisplay').innerText = sec;
+    }
+
+    function executeTrade(direction) {
+      const amount = parseFloat(document.getElementById('tradeAmount').value);
+      if (amount > currentBalance) return alert("Insufficient funds!");
+
+      currentBalance -= amount;
+      document.getElementById('userBalance').innerText = `Balance: $${currentBalance.toFixed(2)}`;
+      
+      const animBox = document.getElementById('animationBox');
+      const countDisplay = document.getElementById('countdown');
+      animBox.style.display = 'block';
+      let timeLeft = selectedDuration;
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        countDisplay.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          animBox.style.display = 'none';
+          
+          // Fetch admin setting: 'WIN' or 'LOSS'
+          const forcedOutcome = localStorage.getItem('admin_outcome_mode') || 'WIN'; 
+          
+          if (forcedOutcome === 'WIN') {
+            const winAmount = amount * 1.85;
+            currentBalance += winAmount;
+            alert(`Trade Won! +$${winAmount.toFixed(2)}`);
+          } else {
+            alert(`Trade Lost! -$${amount.toFixed(2)}`);
+          }
+          document.getElementById('userBalance').innerText = `Balance: $${currentBalance.toFixed(2)}`;
+        }
+      }, 1000);
+    }
+
+    function toggleAuth() {
+      alert("Login/Registration modal opens here (connect to Firebase Auth).");
+    }
+  </script>
+</body>
+</html>

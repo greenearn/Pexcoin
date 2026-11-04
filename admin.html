@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Control Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1e1e2e; color: #fff; padding: 20px; }
+    .card { background: #2b2b3d; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    input, select, button { padding: 10px; margin: 5px 0; display: block; width: 100%; max-width: 400px; }
+    button { background: #22c55e; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Platform Control Center</h2>
+
+  <!-- Admin Controls for Trade Outcomes -->
+  <div class="card">
+    <h3>Trade Outcome Control (Global Rigging)</h3>
+    <label>Select Outcome for All Users:</label>
+    <select id="outcomeSetting" onchange="updateOutcome()">
+      <option value="WIN">Always WIN</option>
+      <option value="LOSS">Always LOSS</option>
+    </select>
+  </div>
+
+  <!-- Admin Controls for Banner Ads -->
+  <div class="card">
+    <h3>Manage Home Page Ads / Wallpaper</h3>
+    <input type="text" id="adUrl" placeholder="Image URL (e.g., https://...)" value="https://via.placeholder.com/800x160">
+    <input type="text" id="adText" placeholder="Ad Title text" value="Exclusive 100% Deposit Bonus">
+    <button onclick="saveAd()">Save Ad Settings</button>
+  </div>
+
+  <!-- Manual Deposit / Withdrawal Approval -->
+  <div class="card">
+    <h3>Manual Deposit & Withdrawal Management</h3>
+    <p>User Request: <strong>user1@mail.com</strong> requested $100 Deposit.</p>
+    <button onclick="alert('Deposit Approved!')">Approve Deposit</button>
+    <button style="background:#ef4444;" onclick="alert('Deposit Rejected!')">Reject</button>
+  </div>
+
+  <script>
+    function updateOutcome() {
+      const mode = document.getElementById('outcomeSetting').value;
+      localStorage.setItem('admin_outcome_mode', mode);
+      alert('Updated default trade outcome to: ' + mode);
+    }
+
+    function saveAd() {
+      const url = document.getElementById('adUrl').value;
+      const text = document.getElementById('adText').value;
+      localStorage.setItem('admin_ad_url', url);
+      localStorage.setItem('admin_ad_text', text);
+      alert('Ad banner updated successfully!');
+    }
+  </script>
+</body>
+</html>
