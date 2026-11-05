@@ -1,364 +1,601 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NepalPOS | Business & Khata Manager</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PexTrade Platform - User & Admin Panel</title>
+    <style>
+        :root {
+            --bg-dark: #0b0e11;
+            --bg-card: #1e2329;
+            --bg-hover: #2b313a;
+            --accent-green: #0ecb81;
+            --accent-red: #f6465d;
+            --accent-yellow: #f0b90b;
+            --text-main: #eaecef;
+            --text-muted: #848e9c;
+            --border-color: #474d57;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navigation Header */
+        header {
+            background-color: #181a20;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .role-switch {
+            background-color: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .user-badge {
+            background-color: rgba(240, 185, 11, 0.15);
+            color: var(--accent-yellow);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Layout Structure */
+        .container {
+            display: flex;
+            flex: 1;
+        }
+
+        sidebar {
+            width: 220px;
+            background-color: #181a20;
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-hover);
+            color: var(--accent-yellow);
+            border-left: 3px solid var(--accent-yellow);
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* Dashboard Metric Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card-title {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Content Sections */
+        .panel-section {
+            display: none;
+        }
+
+        .panel-section.active {
+            display: block;
+        }
+
+        /* Data Tables */
+        .table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #181a20;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+
+        /* Buttons & Controls */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-green { background-color: var(--accent-green); color: #000; }
+        .btn-green:hover { opacity: 0.9; }
+        .btn-red { background-color: var(--accent-red); color: #fff; }
+        .btn-red:hover { opacity: 0.9; }
+        .btn-yellow { background-color: var(--accent-yellow); color: #000; }
+
+        /* Forms & Inputs */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-yellow);
+        }
+
+        .trade-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .trade-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased pb-20">
+<body>
 
-  <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-4 py-3 flex justify-between items-center">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white"> प </div>
-      <span class="text-lg font-bold text-white tracking-wide">NepalPOS <span class="text-xs text-emerald-400 font-normal">Khata</span></span>
-    </div>
-    <div class="text-xs bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
-      Currency: <strong class="text-emerald-400">NPR (Rs.)</strong>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="max-w-md mx-auto p-4 space-y-4">
-
-    <!-- TAB 1: DASHBOARD -->
-    <div id="tab-dashboard" class="tab-content active space-y-4">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="glass-panel p-4 rounded-2xl border border-slate-800">
-          <p class="text-xs text-slate-400">Total Sales (Today)</p>
-          <h3 id="dashTotalSales" class="text-xl font-bold text-emerald-400 mt-1">Rs. 0</h3>
+    <!-- Header -->
+    <header>
+        <div class="logo">⚡ PEX TRADE</div>
+        <div class="nav-controls">
+            <span class="user-badge" id="current-role-badge">USER PANEL</span>
+            <button class="role-switch" onclick="toggleRole()">Switch Panel Mode</button>
         </div>
-        <div class="glass-panel p-4 rounded-2xl border border-slate-800">
-          <p class="text-xs text-slate-400">Total Udharo Given</p>
-          <h3 id="dashTotalUdharo" class="text-xl font-bold text-rose-400 mt-1">Rs. 0</h3>
-        </div>
-      </div>
+    </header>
 
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-bold text-white">Quick Shortcuts</h3>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="switchTab('pos')" class="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2">
-            <i data-lucide="shopping-cart" class="w-4 h-4"></i> New Sale / POS
-          </button>
-          <button onclick="switchTab('inventory')" class="p-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2">
-            <i data-lucide="package" class="w-4 h-4"></i> Add Stock Item
-          </button>
-        </div>
-      </div>
+    <div class="container">
+        <!-- Dynamic Sidebar -->
+        <sidebar id="sidebar-menu">
+            <!-- Sidebar populated via JavaScript based on role -->
+        </sidebar>
 
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
-        <h3 class="text-sm font-bold text-white">Recent Sales Log</h3>
-        <div id="recentSalesList" class="space-y-2 text-xs">
-          <p class="text-slate-400 text-center py-4">No sales recorded yet.</p>
-        </div>
-      </div>
-    </div>
+        <!-- Main View Area -->
+        <main>
+            <!-- USER PANEL VIEWS -->
+            <div id="user-dashboard" class="panel-section active">
+                <h2 style="margin-bottom: 16px;">User Dashboard</h2>
+                <div class="metrics-grid">
+                    <div class="card">
+                        <div class="card-title">Available Balance</div>
+                        <div class="card-value" id="user-balance">$10,250.00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Total Profit / Loss</div>
+                        <div class="card-value text-green">+$1,420.50</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active Trades</div>
+                        <div class="card-value">2</div>
+                    </div>
+                </div>
 
-    <!-- TAB 2: POS / BILLING -->
-    <div id="tab-pos" class="tab-content space-y-4">
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-bold text-white">Select Products to Bill</h3>
-        <div id="posProductGrid" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-          <p class="text-xs text-slate-400 col-span-2 text-center py-4">No inventory items found. Add items in Stock tab.</p>
-        </div>
-      </div>
-
-      <!-- Current Cart -->
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-bold text-white">Current Cart Bill</h3>
-        <div id="cartItemsList" class="space-y-2 max-h-40 overflow-y-auto text-xs">
-          <p class="text-slate-400 text-center py-2">Cart is empty</p>
-        </div>
-        <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-sm font-bold">
-          <span>Grand Total:</span>
-          <span id="cartGrandTotal" class="text-emerald-400">Rs. 0</span>
-        </div>
-        <button onclick="completeSale()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-white rounded-xl text-xs shadow-lg">
-          Complete Checkout & Print Bill
-        </button>
-      </div>
-    </div>
-
-    <!-- TAB 3: INVENTORY (STOCK) -->
-    <div id="tab-inventory" class="tab-content space-y-4">
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-bold text-white">Add New Product</h3>
-        <input type="text" id="prodName" placeholder="Product Name (e.g., Rice 25kg)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <input type="number" id="prodPrice" placeholder="Selling Price (Rs.)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-          <input type="number" id="prodStock" placeholder="Stock Quantity" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-        </div>
-        <button onclick="addProduct()" class="w-full py-2 bg-blue-600 font-bold text-white rounded-lg text-xs">Save Product to Stock</button>
-      </div>
-
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
-        <h3 class="text-sm font-bold text-white">Current Inventory Stock</h3>
-        <div id="inventoryList" class="space-y-2 text-xs">
-          <p class="text-slate-400 text-center py-4">Inventory is empty.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: KHATA (CUSTOMERS / UDHARO) -->
-    <div id="tab-khata" class="tab-content space-y-4">
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-bold text-white">Add Customer Khata</h3>
-        <input type="text" id="custName" placeholder="Customer Name" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-        <input type="text" id="custPhone" placeholder="Phone Number" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-        <input type="number" id="custUdharo" placeholder="Initial Udharo Balance (Rs.)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-        <button onclick="addCustomer()" class="w-full py-2 bg-purple-600 font-bold text-white rounded-lg text-xs">Add Customer Account</button>
-      </div>
-
-      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
-        <h3 class="text-sm font-bold text-white">Customer Credit List (Udharo Khata)</h3>
-        <div id="customerList" class="space-y-2 text-xs">
-          <p class="text-slate-400 text-center py-4">No customer khata added yet.</p>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-slate-800 px-4 py-2 flex justify-around items-center max-w-md mx-auto z-50">
-    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center text-emerald-400 text-[10px]">
-      <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
-    </button>
-    <button onclick="switchTab('pos')" id="nav-pos" class="flex flex-col items-center text-slate-400 text-[10px]">
-      <i data-lucide="shopping-cart" class="w-5 h-5"></i> POS Bill
-    </button>
-    <button onclick="switchTab('inventory')" id="nav-inventory" class="flex flex-col items-center text-slate-400 text-[10px]">
-      <i data-lucide="package" class="w-5 h-5"></i> Stock
-    </button>
-    <button onclick="switchTab('khata')" id="nav-khata" class="flex flex-col items-center text-slate-400 text-[10px]">
-      <i data-lucide="book-user" class="w-5 h-5"></i> Khata
-    </button>
-  </nav>
-
-  <script>
-    lucide.createIcons();
-
-    // Data Store initialization
-    let inventory = JSON.parse(localStorage.getItem('pos_inventory') || '[]');
-    let cart = [];
-    let sales = JSON.parse(localStorage.getItem('pos_sales') || '[]');
-    let customers = JSON.parse(localStorage.getItem('pos_customers') || '[]');
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('nav button').forEach(el => el.classList.replace('text-emerald-400', 'text-slate-400'));
-      
-      document.getElementById('tab-' + tabName).classList.add('active');
-      document.getElementById('nav-' + tabName).classList.replace('text-slate-400', 'text-emerald-400');
-      
-      if(tabName === 'pos') renderPOSProducts();
-      if(tabName === 'dashboard') updateDashboard();
-    }
-
-    // --- INVENTORY FUNCTIONS ---
-    function addProduct() {
-      const name = document.getElementById('prodName').value;
-      const price = parseFloat(document.getElementById('prodPrice').value);
-      const stock = parseInt(document.getElementById('prodStock').value);
-
-      if(!name || isNaN(price) || isNaN(stock)) return alert('Please fill all fields correctly');
-
-      inventory.push({ id: Date.now(), name, price, stock });
-      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
-      
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodPrice').value = '';
-      document.getElementById('prodStock').value = '';
-      renderInventory();
-      alert('Product added to stock successfully!');
-    }
-
-    function renderInventory() {
-      const container = document.getElementById('inventoryList');
-      if(inventory.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-center py-4">Inventory is empty.</p>';
-        return;
-      }
-      container.innerHTML = inventory.map(item => `
-        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div>
-            <p class="font-bold text-white">${item.name}</p>
-            <p class="text-slate-400">Price: Rs. ${item.price} | Stock: <span class="${item.stock < 5 ? 'text-rose-400 font-bold':'text-emerald-400'}">${item.stock} units</span></p>
-          </div>
-          <button onclick="deleteProduct(${item.id})" class="text-rose-400 hover:text-rose-300 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>
-      `).join('');
-      lucide.createIcons();
-    }
-
-    function deleteProduct(id) {
-      inventory = inventory.filter(i => i.id !== id);
-      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
-      renderInventory();
-    }
-
-    // --- POS BILLING FUNCTIONS ---
-    function renderPOSProducts() {
-      const container = document.getElementById('posProductGrid');
-      if(inventory.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 col-span-2 text-center py-4">No inventory items found.</p>';
-        return;
-      }
-      container.innerHTML = inventory.map(item => `
-        <div onclick="addToCart(${item.id})" class="bg-slate-900 p-3 rounded-xl border border-slate-800 cursor-pointer hover:border-emerald-500 transition-all">
-          <p class="font-bold text-white truncate">${item.name}</p>
-          <p class="text-emerald-400 font-bold mt-1">Rs. ${item.price}</p>
-          <p class="text-[10px] text-slate-400">Stock: ${item.stock}</p>
-        </div>
-      `).join('');
-    }
-
-    function addToCart(id) {
-      const prod = inventory.find(i => i.id === id);
-      if(!prod || prod.stock <= 0) return alert('Out of stock!');
-
-      const existing = cart.find(c => c.id === id);
-      if(existing) {
-        if(existing.qty >= prod.stock) return alert('Not enough stock available!');
-        existing.qty++;
-      } else {
-        cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
-      }
-      renderCart();
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cartItemsList');
-      if(cart.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-center py-2">Cart is empty</p>';
-        document.getElementById('cartGrandTotal').innerText = 'Rs. 0';
-        return;
-      }
-
-      let grandTotal = 0;
-      container.innerHTML = cart.map(item => {
-        let total = item.price * item.qty;
-        grandTotal += total;
-        return `
-          <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg">
-            <div>
-              <span class="font-bold text-white">${item.name}</span>
-              <span class="text-slate-400 block">Rs. ${item.price} x ${item.qty}</span>
+                <h3 style="margin-bottom: 12px;">Open Positions</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Entry Price</th>
+                                <th>PNL</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>BTC/USDT</td>
+                                <td class="text-green">BUY</td>
+                                <td>$1,000</td>
+                                <td>$80,200.00</td>
+                                <td class="text-green">+$150.00</td>
+                                <td><button class="btn btn-red" onclick="alert('Position Closed')">Close</button></td>
+                            </tr>
+                            <tr>
+                                <td>ETH/USDT</td>
+                                <td class="text-red">SELL</td>
+                                <td>$500</td>
+                                <td>$2,450.00</td>
+                                <td class="text-red">-$25.00</td>
+                                <td><button class="btn btn-red" onclick="alert('Position Closed')">Close</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <span class="font-bold text-emerald-400">Rs. ${total}</span>
-          </div>
+
+            <div id="user-tradelist" class="panel-section">
+                <h2 style="margin-bottom: 16px;">Live Trade Market</h2>
+                <div class="trade-grid">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th>Price</th>
+                                    <th>24h Change</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="market-list">
+                                <tr>
+                                    <td><strong>BTC/USDT</strong></td>
+                                    <td>$80,371.35</td>
+                                    <td class="text-green">+0.13%</td>
+                                    <td><button class="btn btn-yellow" onclick="selectPair('BTC/USDT')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ETH/USDT</strong></td>
+                                    <td>$2,428.58</td>
+                                    <td class="text-green">+0.11%</td>
+                                    <td><button class="btn btn-yellow" onclick="selectPair('ETH/USDT')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TRX/USDT</strong></td>
+                                    <td>$0.3200</td>
+                                    <td class="text-green">+0.00%</td>
+                                    <td><button class="btn btn-yellow" onclick="selectPair('TRX/USDT')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>XRP/USDT</strong></td>
+                                    <td>$1.3150</td>
+                                    <td class="text-red">-0.05%</td>
+                                    <td><button class="btn btn-yellow" onclick="selectPair('XRP/USDT')">Trade</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Order Form -->
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px;" id="selected-pair-title">Place Order (BTC/USDT)</h3>
+                        <form onsubmit="executeTrade(event)">
+                            <div class="form-group">
+                                <label>Order Type</label>
+                                <select>
+                                    <option>Market Order</option>
+                                    <option>Limit Order</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Leverage</label>
+                                <select>
+                                    <option>1x</option>
+                                    <option>10x</option>
+                                    <option>50x</option>
+                                    <option>100x</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount (USDT)</label>
+                                <input type="number" placeholder="0.00" required>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn btn-green" style="flex: 1;">Buy / Long</button>
+                                <button type="submit" class="btn btn-red" style="flex: 1;">Sell / Short</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="user-wallet" class="panel-section">
+                <h2 style="margin-bottom: 16px;">Wallet & Funds</h2>
+                <div class="trade-grid">
+                    <div class="card">
+                        <h3 style="margin-bottom: 12px;">Deposit Funds</h3>
+                        <form onsubmit="handleDeposit(event)">
+                            <div class="form-group">
+                                <label>Payment Network</label>
+                                <select>
+                                    <option>USDT (TRC20)</option>
+                                    <option>Bitcoin (BTC)</option>
+                                    <option>Direct Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Deposit Amount ($)</label>
+                                <input type="number" placeholder="Minimum $250" required>
+                            </div>
+                            <button type="submit" class="btn btn-green" style="width: 100%;">Submit Deposit Request</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 12px;">Withdraw Funds</h3>
+                        <form onsubmit="handleWithdraw(event)">
+                            <div class="form-group">
+                                <label>Withdrawal Destination</label>
+                                <input type="text" placeholder="Wallet Address / IBAN" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount ($)</label>
+                                <input type="number" placeholder="0.00" required>
+                            </div>
+                            <button type="submit" class="btn btn-yellow" style="width: 100%;">Request Withdrawal</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL VIEWS -->
+            <div id="admin-overview" class="panel-section">
+                <h2 style="margin-bottom: 16px;">Admin System Overview</h2>
+                <div class="metrics-grid">
+                    <div class="card">
+                        <div class="card-title">Total Platform Balance</div>
+                        <div class="card-value">$1,450,800.00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active Registered Users</div>
+                        <div class="card-value">1,248</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Pending Deposits</div>
+                        <div class="card-value text-green">3</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Pending Withdrawals</div>
+                        <div class="card-value text-red">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-users" class="panel-section">
+                <h2 style="margin-bottom: 16px;">User Management</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#USR-101</td>
+                                <td>Alex Johnson</td>
+                                <td>alex@example.com</td>
+                                <td>$10,250.00</td>
+                                <td><span class="text-green">Active</span></td>
+                                <td><button class="btn btn-yellow" onclick="editUser('#USR-101')">Edit Balance</button></td>
+                            </tr>
+                            <tr>
+                                <td>#USR-102</td>
+                                <td>Maria Garcia</td>
+                                <td>maria@example.com</td>
+                                <td>$4,120.00</td>
+                                <td><span class="text-green">Active</span></td>
+                                <td><button class="btn btn-yellow" onclick="editUser('#USR-102')">Edit Balance</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin-financials" class="panel-section">
+                <h2 style="margin-bottom: 16px;">Pending Financial Requests</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>User ID</th>
+                                <th>Amount</th>
+                                <th>Gateway</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="text-green">Deposit</span></td>
+                                <td>#USR-101</td>
+                                <td>$500.00</td>
+                                <td>USDT (TRC20)</td>
+                                <td>
+                                    <button class="btn btn-green" onclick="alert('Deposit Approved')">Approve</button>
+                                    <button class="btn btn-red" onclick="alert('Deposit Rejected')">Reject</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-red">Withdrawal</span></td>
+                                <td>#USR-102</td>
+                                <td>$1,200.00</td>
+                                <td>Bank Transfer</td>
+                                <td>
+                                    <button class="btn btn-green" onclick="alert('Withdrawal Approved')">Approve</button>
+                                    <button class="btn btn-red" onclick="alert('Withdrawal Rejected')">Reject</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentRole = 'user'; // 'user' or 'admin'
+
+        const userSidebar = `
+            <div class="nav-item active" onclick="switchTab('user-dashboard', this)">Dashboard</div>
+            <div class="nav-item" onclick="switchTab('user-tradelist', this)">Trade List</div>
+            <div class="nav-item" onclick="switchTab('user-wallet', this)">Deposit & Withdraw</div>
         `;
-      }).join('');
 
-      document.getElementById('cartGrandTotal').innerText = `Rs. ${grandTotal}`;
-    }
+        const adminSidebar = `
+            <div class="nav-item active" onclick="switchTab('admin-overview', this)">System Overview</div>
+            <div class="nav-item" onclick="switchTab('admin-users', this)">Manage Users</div>
+            <div class="nav-item" onclick="switchTab('admin-financials', this)">Approvals & Requests</div>
+        `;
 
-    function completeSale() {
-      if(cart.length === 0) return alert('Cart is empty!');
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar-menu');
+            const badge = document.getElementById('current-role-badge');
+            
+            if (currentRole === 'user') {
+                sidebar.innerHTML = userSidebar;
+                badge.innerText = 'USER PANEL';
+                badge.style.color = 'var(--accent-yellow)';
+                switchTab('user-dashboard');
+            } else {
+                sidebar.innerHTML = adminSidebar;
+                badge.innerText = 'ADMIN PANEL';
+                badge.style.color = 'var(--accent-red)';
+                switchTab('admin-overview');
+            }
+        }
 
-      let totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        function toggleRole() {
+            currentRole = currentRole === 'user' ? 'admin' : 'user';
+            renderSidebar();
+        }
 
-      // Deduct stock
-      cart.forEach(cartItem => {
-        const invItem = inventory.find(i => i.id === cartItem.id);
-        if(invItem) invItem.stock -= cartItem.qty;
-      });
+        function switchTab(tabId, element = null) {
+            document.querySelectorAll('.panel-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
 
-      sales.unshift({ date: new Date().toLocaleTimeString(), items: [...cart], total: totalAmount });
-      
-      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
-      localStorage.setItem('pos_sales', JSON.stringify(sales));
+            if (element) {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                element.classList.add('active');
+            }
+        }
 
-      cart = [];
-      renderCart();
-      renderPOSProducts();
-      updateDashboard();
-      alert(`Sale completed successfully! Total: Rs. ${totalAmount}`);
-    }
+        function selectPair(pairName) {
+            document.getElementById('selected-pair-title').innerText = `Place Order (${pairName})`;
+        }
 
-    // --- KHATA / CUSTOMER FUNCTIONS ---
-    function addCustomer() {
-      const name = document.getElementById('custName').value;
-      const phone = document.getElementById('custPhone').value;
-      const udharo = parseFloat(document.getElementById('custUdharo').value) || 0;
+        function executeTrade(e) {
+            e.preventDefault();
+            alert('Trade order submitted successfully!');
+        }
 
-      if(!name) return alert('Enter customer name');
+        function handleDeposit(e) {
+            e.preventDefault();
+            alert('Deposit request submitted! Awaiting admin approval.');
+        }
 
-      customers.push({ id: Date.now(), name, phone, udharo });
-      localStorage.setItem('pos_customers', JSON.stringify(customers));
+        function handleWithdraw(e) {
+            e.preventDefault();
+            alert('Withdrawal request submitted! Awaiting admin review.');
+        }
 
-      document.getElementById('custName').value = '';
-      document.getElementById('custPhone').value = '';
-      document.getElementById('custUdharo').value = '';
-      renderCustomers();
-      alert('Khata account added!');
-    }
+        function editUser(userId) {
+            const newBal = prompt(`Enter new balance for user ${userId}:`);
+            if (newBal !== null) {
+                alert(`Balance updated to $${newBal}`);
+            }
+        }
 
-    function renderCustomers() {
-      const container = document.getElementById('customerList');
-      if(customers.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-center py-4">No customer khata added yet.</p>';
-        return;
-      }
-      container.innerHTML = customers.map(c => `
-        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div>
-            <p class="font-bold text-white">${c.name} <span class="text-xs text-slate-400">(${c.phone || 'No phone'})</span></p>
-            <p class="text-xs text-rose-400 font-semibold mt-0.5">Udharo Due: Rs. ${c.udharo}</p>
-          </div>
-          <button onclick="clearUdharo(${c.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-[10px] font-bold text-white">Settle</button>
-        </div>
-      `).join('');
-    }
-
-    function clearUdharo(id) {
-      const cust = customers.find(c => c.id === id);
-      if(cust) {
-        cust.udharo = 0;
-        localStorage.setItem('pos_customers', JSON.stringify(customers));
-        renderCustomers();
-        updateDashboard();
-        alert('Khata settled successfully!');
-      }
-    }
-
-    // --- DASHBOARD UPDATER ---
-    function updateDashboard() {
-      let totalSalesToday = sales.reduce((sum, s) => sum + s.total, 0);
-      let totalUdharoDue = customers.reduce((sum, c) => sum + c.udharo, 0);
-
-      document.getElementById('dashTotalSales').innerText = `Rs. ${totalSalesToday}`;
-      document.getElementById('dashTotalUdharo').innerText = `Rs. ${totalUdharoDue}`;
-
-      const salesContainer = document.getElementById('recentSalesList');
-      if(sales.length === 0) {
-        salesContainer.innerHTML = '<p class="text-slate-400 text-center py-4">No sales recorded yet.</p>';
-        return;
-      }
-      salesContainer.innerHTML = sales.slice(0, 5).map(s => `
-        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
-          <div>
-            <span class="text-white font-bold">${s.date}</span>
-            <span class="text-slate-400 block">${s.items.length} items sold</span>
-          </div>
-          <span class="font-bold text-emerald-400">Rs. ${s.total}</span>
-        </div>
-      `).join('');
-    }
-
-    // Initialize initial views on load
-    window.onload = function() {
-      renderInventory();
-      renderCustomers();
-      updateDashboard();
-    };
-  </script>
+        // Initialize UI
+        renderSidebar();
+    </script>
 </body>
 </html>
