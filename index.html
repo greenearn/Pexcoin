@@ -3,250 +3,362 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ApexTrader | Global Trading Platform</title>
+  <title>NepalPOS | Business & Khata Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    .glass-panel { background: rgba(15, 23, 42, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased pb-12">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased pb-20">
 
-  <!-- Navigation Bar -->
+  <!-- Top Navigation Bar -->
   <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-4 py-3 flex justify-between items-center">
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold">📈</div>
-      <span class="text-lg font-bold text-white">ApexTrader</span>
+      <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white"> प </div>
+      <span class="text-lg font-bold text-white tracking-wide">NepalPOS <span class="text-xs text-emerald-400 font-normal">Khata</span></span>
     </div>
-    <div class="flex items-center gap-2">
-      <span id="userBalance" class="text-emerald-400 font-bold text-sm">$250.00</span>
-      <button id="authBtn" onclick="toggleAuthModal()" class="px-3 py-1.5 rounded-lg bg-blue-600 font-semibold text-xs">Login</button>
+    <div class="text-xs bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
+      Currency: <strong class="text-emerald-400">NPR (Rs.)</strong>
     </div>
   </header>
 
-  <div class="max-w-md mx-auto p-4 space-y-4">
+  <!-- Main Container -->
+  <main class="max-w-md mx-auto p-4 space-y-4">
 
-    <!-- Promo Banner -->
-    <div id="adBanner" class="rounded-2xl p-4 bg-gradient-to-r from-blue-900 to-indigo-900 border border-slate-800">
-      <span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-full">PROMO</span>
-      <h2 id="adTitle" class="text-lg font-bold mt-1 text-white">Get Up To 100% Deposit Bonus</h2>
-    </div>
-
-    <!-- Auth Modal / Box -->
-    <div id="authBox" class="glass-panel p-4 rounded-2xl border border-slate-800 hidden space-y-3">
-      <h3 id="authTitle" class="text-md font-bold text-white">User Login</h3>
-      <input type="email" id="authEmail" placeholder="Email Address" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
-      <input type="password" id="authPassword" placeholder="Password" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm">
-      <button onclick="handleAuthSubmit()" class="w-full py-2 bg-emerald-500 font-bold text-white rounded-lg text-sm">Submit</button>
-      <p class="text-center text-xs text-blue-400 cursor-pointer" onclick="switchAuthMode()">Switch Login/Register</p>
-    </div>
-
-    <!-- Interactive Price & Canvas Chart Card -->
-    <div class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-3">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 id="chartPairTitle" class="text-base font-bold text-white">BTC / USDT</h3>
-          <span id="livePriceHeader" class="text-xl font-bold text-emerald-400">$65,000.00</span>
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs text-slate-400">Total Sales (Today)</p>
+          <h3 id="dashTotalSales" class="text-xl font-bold text-emerald-400 mt-1">Rs. 0</h3>
         </div>
-        <div class="flex gap-1">
-          <button onclick="setPair('BTCUSDT', 65000)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">BTC</button>
-          <button onclick="setPair('ETHUSDT', 3500)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">ETH</button>
-          <button onclick="setPair('SOLUSDT', 145)" class="px-2 py-1 text-xs rounded bg-slate-800 text-slate-300">SOL</button>
+        <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs text-slate-400">Total Udharo Given</p>
+          <h3 id="dashTotalUdharo" class="text-xl font-bold text-rose-400 mt-1">Rs. 0</h3>
         </div>
       </div>
-      
-      <!-- Custom Smooth Live Canvas Chart -->
-      <div class="w-full h-48 bg-slate-900 rounded-xl relative overflow-hidden border border-slate-800">
-        <canvas id="priceCanvas" class="w-full h-full"></canvas>
-      </div>
-    </div>
 
-    <!-- Trading Control Panel -->
-    <div class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-3">
-      <h3 class="text-md font-bold text-white">Quick Trade</h3>
-      
-      <div>
-        <label class="text-xs text-slate-400">Investment Amount ($)</label>
-        <input type="number" id="tradeAmount" value="20" class="w-full mt-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm font-bold">
-      </div>
-
-      <div>
-        <label class="text-xs text-slate-400">Duration</label>
-        <div class="grid grid-cols-3 gap-2 mt-1">
-          <button onclick="setDuration(30)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-blue-400">30s</button>
-          <button onclick="setDuration(60)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-300">60s</button>
-          <button onclick="setDuration(120)" class="py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-bold text-slate-300">120s</button>
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h3 class="text-sm font-bold text-white">Quick Shortcuts</h3>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="switchTab('pos')" class="p-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i> New Sale / POS
+          </button>
+          <button onclick="switchTab('inventory')" class="p-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2">
+            <i data-lucide="package" class="w-4 h-4"></i> Add Stock Item
+          </button>
         </div>
-        <p class="text-xs text-slate-400 mt-1">Timer: <span id="selectedDurationDisplay" class="text-blue-400 font-bold">30</span>s</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 pt-1">
-        <button onclick="executeTrade('up')" class="py-3 bg-emerald-500 text-white font-bold rounded-xl text-sm shadow-lg">Call (UP)</button>
-        <button onclick="executeTrade('down')" class="py-3 bg-rose-500 text-white font-bold rounded-xl text-sm shadow-lg">Put (DOWN)</button>
-      </div>
-
-      <div id="animationBox" class="hidden p-3 rounded-xl bg-slate-900 border border-blue-500/40 text-center space-y-1">
-        <p class="text-xs text-slate-300">Contract running...</p>
-        <p class="text-lg font-extrabold text-amber-400" id="countdown">30s</p>
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
+        <h3 class="text-sm font-bold text-white">Recent Sales Log</h3>
+        <div id="recentSalesList" class="space-y-2 text-xs">
+          <p class="text-slate-400 text-center py-4">No sales recorded yet.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Wallet & Deposit Section -->
-    <div id="walletBox" class="glass-panel rounded-2xl p-4 border border-slate-800 space-y-2 hidden">
-      <h3 class="text-sm font-bold text-white">Manual Deposit</h3>
-      <input type="number" id="depositAmount" placeholder="Amount to deposit" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
-      <button onclick="requestDeposit()" class="w-full py-2 bg-emerald-600 text-white font-bold rounded-lg text-xs">Submit Deposit</button>
+    <!-- TAB 2: POS / BILLING -->
+    <div id="tab-pos" class="tab-content space-y-4">
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h3 class="text-sm font-bold text-white">Select Products to Bill</h3>
+        <div id="posProductGrid" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+          <p class="text-xs text-slate-400 col-span-2 text-center py-4">No inventory items found. Add items in Stock tab.</p>
+        </div>
+      </div>
+
+      <!-- Current Cart -->
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h3 class="text-sm font-bold text-white">Current Cart Bill</h3>
+        <div id="cartItemsList" class="space-y-2 max-h-40 overflow-y-auto text-xs">
+          <p class="text-slate-400 text-center py-2">Cart is empty</p>
+        </div>
+        <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-sm font-bold">
+          <span>Grand Total:</span>
+          <span id="cartGrandTotal" class="text-emerald-400">Rs. 0</span>
+        </div>
+        <button onclick="completeSale()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-white rounded-xl text-xs shadow-lg">
+          Complete Checkout & Print Bill
+        </button>
+      </div>
     </div>
 
-  </div>
+    <!-- TAB 3: INVENTORY (STOCK) -->
+    <div id="tab-inventory" class="tab-content space-y-4">
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h3 class="text-sm font-bold text-white">Add New Product</h3>
+        <input type="text" id="prodName" placeholder="Product Name (e.g., Rice 25kg)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="prodPrice" placeholder="Selling Price (Rs.)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+          <input type="number" id="prodStock" placeholder="Stock Quantity" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+        </div>
+        <button onclick="addProduct()" class="w-full py-2 bg-blue-600 font-bold text-white rounded-lg text-xs">Save Product to Stock</button>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
+        <h3 class="text-sm font-bold text-white">Current Inventory Stock</h3>
+        <div id="inventoryList" class="space-y-2 text-xs">
+          <p class="text-slate-400 text-center py-4">Inventory is empty.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: KHATA (CUSTOMERS / UDHARO) -->
+    <div id="tab-khata" class="tab-content space-y-4">
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h3 class="text-sm font-bold text-white">Add Customer Khata</h3>
+        <input type="text" id="custName" placeholder="Customer Name" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+        <input type="text" id="custPhone" placeholder="Phone Number" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+        <input type="number" id="custUdharo" placeholder="Initial Udharo Balance (Rs.)" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs">
+        <button onclick="addCustomer()" class="w-full py-2 bg-purple-600 font-bold text-white rounded-lg text-xs">Add Customer Account</button>
+      </div>
+
+      <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-2">
+        <h3 class="text-sm font-bold text-white">Customer Credit List (Udharo Khata)</h3>
+        <div id="customerList" class="space-y-2 text-xs">
+          <p class="text-slate-400 text-center py-4">No customer khata added yet.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-slate-800 px-4 py-2 flex justify-around items-center max-w-md mx-auto z-50">
+    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center text-emerald-400 text-[10px]">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+    </button>
+    <button onclick="switchTab('pos')" id="nav-pos" class="flex flex-col items-center text-slate-400 text-[10px]">
+      <i data-lucide="shopping-cart" class="w-5 h-5"></i> POS Bill
+    </button>
+    <button onclick="switchTab('inventory')" id="nav-inventory" class="flex flex-col items-center text-slate-400 text-[10px]">
+      <i data-lucide="package" class="w-5 h-5"></i> Stock
+    </button>
+    <button onclick="switchTab('khata')" id="nav-khata" class="flex flex-col items-center text-slate-400 text-[10px]">
+      <i data-lucide="book-user" class="w-5 h-5"></i> Khata
+    </button>
+  </nav>
 
   <script>
-    let currentPrice = 65000.00;
-    let selectedDuration = 30;
-    let userBalance = parseFloat(localStorage.getItem('user_balance') || '250.00');
-    let currentUser = localStorage.getItem('current_user') || null;
-    let priceHistory = [];
+    lucide.createIcons();
 
-    window.onload = function() {
-      if (localStorage.getItem('admin_ad_text')) document.getElementById('adTitle').innerText = localStorage.getItem('admin_ad_text');
-      checkSession();
-      initCanvasChart();
-    };
+    // Data Store initialization
+    let inventory = JSON.parse(localStorage.getItem('pos_inventory') || '[]');
+    let cart = [];
+    let sales = JSON.parse(localStorage.getItem('pos_sales') || '[]');
+    let customers = JSON.parse(localStorage.getItem('pos_customers') || '[]');
 
-    function setPair(pair, basePrice) {
-      document.getElementById('chartPairTitle').innerText = pair.replace('USDT', ' / USDT');
-      currentPrice = basePrice;
-    }
-
-    function setDuration(sec) {
-      selectedDuration = sec;
-      document.getElementById('selectedDurationDisplay').innerText = sec;
-    }
-
-    function toggleAuthModal() {
-      const box = document.getElementById('authBox');
-      box.classList.toggle('hidden');
-    }
-
-    let isLogin = true;
-    function switchAuthMode() {
-      isLogin = !isLogin;
-      document.getElementById('authTitle').innerText = isLogin ? 'User Login' : 'User Registration';
-    }
-
-    function handleAuthSubmit() {
-      const email = document.getElementById('authEmail').value;
-      if (!email) return alert('Enter email');
-      currentUser = email;
-      localStorage.setItem('current_user', currentUser);
-      toggleAuthModal();
-      checkSession();
-      alert('Logged in successfully!');
-    }
-
-    function checkSession() {
-      if (currentUser) {
-        document.getElementById('userBalance').innerText = `$${userBalance.toFixed(2)}`;
-        document.getElementById('authBtn').innerText = 'Logout';
-        document.getElementById('authBtn').setAttribute('onclick', 'logout()');
-        document.getElementById('walletBox').classList.remove('hidden');
-      } else {
-        document.getElementById('userBalance').innerText = '$250.00';
-        document.getElementById('authBtn').innerText = 'Login';
-        document.getElementById('authBtn').setAttribute('onclick', 'toggleAuthModal()');
-        document.getElementById('walletBox').classList.add('hidden');
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('current_user');
-      currentUser = null;
-      checkSession();
-      alert('Logged out');
-    }
-
-    function requestDeposit() {
-      const amt = document.getElementById('depositAmount').value;
-      if (!amt) return alert('Enter amount');
-      alert('Deposit request sent to admin panel!');
-    }
-
-    function executeTrade(direction) {
-      const amount = parseFloat(document.getElementById('tradeAmount').value);
-      if (amount > userBalance) return alert('Insufficient balance!');
-
-      userBalance -= amount;
-      updateBal();
-
-      const animBox = document.getElementById('animationBox');
-      const countDisplay = document.getElementById('countdown');
-      animBox.classList.remove('hidden');
-      let timeLeft = selectedDuration;
-
-      const timer = setInterval(() => {
-        timeLeft--;
-        countDisplay.innerText = `${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          animBox.classList.add('hidden');
-
-          // Controlled via admin.html outcome mode (WIN or LOSS)
-          const mode = localStorage.getItem('admin_outcome_mode') || 'WIN';
-          if (mode === 'WIN') {
-            const win = amount * 1.85;
-            userBalance += win;
-            alert(`🎉 Trade Won! +$${win.toFixed(2)}`);
-          } else {
-            alert(`❌ Trade Lost: -$${amount.toFixed(2)}`);
-          }
-          updateBal();
-        }
-      }, 1000);
-    }
-
-    function updateBal() {
-      localStorage.setItem('user_balance', userBalance);
-      document.getElementById('userBalance').innerText = `$${userBalance.toFixed(2)}`;
-    }
-
-    // Smooth Canvas Chart Generator
-    function initCanvasChart() {
-      const canvas = document.getElementById('priceCanvas');
-      const ctx = canvas.getContext('2d');
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(el => el.classList.replace('text-emerald-400', 'text-slate-400'));
       
-      for(let i=0; i<40; i++) {
-        currentPrice += (Math.random() - 0.48) * 15;
-        priceHistory.push(currentPrice);
+      document.getElementById('tab-' + tabName).classList.add('active');
+      document.getElementById('nav-' + tabName).classList.replace('text-slate-400', 'text-emerald-400');
+      
+      if(tabName === 'pos') renderPOSProducts();
+      if(tabName === 'dashboard') updateDashboard();
+    }
+
+    // --- INVENTORY FUNCTIONS ---
+    function addProduct() {
+      const name = document.getElementById('prodName').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const stock = parseInt(document.getElementById('prodStock').value);
+
+      if(!name || isNaN(price) || isNaN(stock)) return alert('Please fill all fields correctly');
+
+      inventory.push({ id: Date.now(), name, price, stock });
+      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
+      
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodStock').value = '';
+      renderInventory();
+      alert('Product added to stock successfully!');
+    }
+
+    function renderInventory() {
+      const container = document.getElementById('inventoryList');
+      if(inventory.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-center py-4">Inventory is empty.</p>';
+        return;
+      }
+      container.innerHTML = inventory.map(item => `
+        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div>
+            <p class="font-bold text-white">${item.name}</p>
+            <p class="text-slate-400">Price: Rs. ${item.price} | Stock: <span class="${item.stock < 5 ? 'text-rose-400 font-bold':'text-emerald-400'}">${item.stock} units</span></p>
+          </div>
+          <button onclick="deleteProduct(${item.id})" class="text-rose-400 hover:text-rose-300 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function deleteProduct(id) {
+      inventory = inventory.filter(i => i.id !== id);
+      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
+      renderInventory();
+    }
+
+    // --- POS BILLING FUNCTIONS ---
+    function renderPOSProducts() {
+      const container = document.getElementById('posProductGrid');
+      if(inventory.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 col-span-2 text-center py-4">No inventory items found.</p>';
+        return;
+      }
+      container.innerHTML = inventory.map(item => `
+        <div onclick="addToCart(${item.id})" class="bg-slate-900 p-3 rounded-xl border border-slate-800 cursor-pointer hover:border-emerald-500 transition-all">
+          <p class="font-bold text-white truncate">${item.name}</p>
+          <p class="text-emerald-400 font-bold mt-1">Rs. ${item.price}</p>
+          <p class="text-[10px] text-slate-400">Stock: ${item.stock}</p>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(id) {
+      const prod = inventory.find(i => i.id === id);
+      if(!prod || prod.stock <= 0) return alert('Out of stock!');
+
+      const existing = cart.find(c => c.id === id);
+      if(existing) {
+        if(existing.qty >= prod.stock) return alert('Not enough stock available!');
+        existing.qty++;
+      } else {
+        cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItemsList');
+      if(cart.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-center py-2">Cart is empty</p>';
+        document.getElementById('cartGrandTotal').innerText = 'Rs. 0';
+        return;
       }
 
-      setInterval(() => {
-        currentPrice += (Math.random() - 0.48) * 20;
-        priceHistory.push(currentPrice);
-        if (priceHistory.length > 40) priceHistory.shift();
+      let grandTotal = 0;
+      container.innerHTML = cart.map(item => {
+        let total = item.price * item.qty;
+        grandTotal += total;
+        return `
+          <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg">
+            <div>
+              <span class="font-bold text-white">${item.name}</span>
+              <span class="text-slate-400 block">Rs. ${item.price} x ${item.qty}</span>
+            </div>
+            <span class="font-bold text-emerald-400">Rs. ${total}</span>
+          </div>
+        `;
+      }).join('');
 
-        document.getElementById('livePriceHeader').innerText = `$${currentPrice.toFixed(2)}`;
-
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        const max = Math.max(...priceHistory);
-        const min = Math.min(...priceHistory);
-        const range = max - min || 1;
-
-        priceHistory.forEach((p, idx) => {
-          const x = (idx / (priceHistory.length - 1)) * canvas.width;
-          const y = canvas.height - ((p - min) / range) * (canvas.height - 20) - 10;
-          if (idx === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-      }, 1000);
+      document.getElementById('cartGrandTotal').innerText = `Rs. ${grandTotal}`;
     }
+
+    function completeSale() {
+      if(cart.length === 0) return alert('Cart is empty!');
+
+      let totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      // Deduct stock
+      cart.forEach(cartItem => {
+        const invItem = inventory.find(i => i.id === cartItem.id);
+        if(invItem) invItem.stock -= cartItem.qty;
+      });
+
+      sales.unshift({ date: new Date().toLocaleTimeString(), items: [...cart], total: totalAmount });
+      
+      localStorage.setItem('pos_inventory', JSON.stringify(inventory));
+      localStorage.setItem('pos_sales', JSON.stringify(sales));
+
+      cart = [];
+      renderCart();
+      renderPOSProducts();
+      updateDashboard();
+      alert(`Sale completed successfully! Total: Rs. ${totalAmount}`);
+    }
+
+    // --- KHATA / CUSTOMER FUNCTIONS ---
+    function addCustomer() {
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const udharo = parseFloat(document.getElementById('custUdharo').value) || 0;
+
+      if(!name) return alert('Enter customer name');
+
+      customers.push({ id: Date.now(), name, phone, udharo });
+      localStorage.setItem('pos_customers', JSON.stringify(customers));
+
+      document.getElementById('custName').value = '';
+      document.getElementById('custPhone').value = '';
+      document.getElementById('custUdharo').value = '';
+      renderCustomers();
+      alert('Khata account added!');
+    }
+
+    function renderCustomers() {
+      const container = document.getElementById('customerList');
+      if(customers.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-center py-4">No customer khata added yet.</p>';
+        return;
+      }
+      container.innerHTML = customers.map(c => `
+        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div>
+            <p class="font-bold text-white">${c.name} <span class="text-xs text-slate-400">(${c.phone || 'No phone'})</span></p>
+            <p class="text-xs text-rose-400 font-semibold mt-0.5">Udharo Due: Rs. ${c.udharo}</p>
+          </div>
+          <button onclick="clearUdharo(${c.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-[10px] font-bold text-white">Settle</button>
+        </div>
+      `).join('');
+    }
+
+    function clearUdharo(id) {
+      const cust = customers.find(c => c.id === id);
+      if(cust) {
+        cust.udharo = 0;
+        localStorage.setItem('pos_customers', JSON.stringify(customers));
+        renderCustomers();
+        updateDashboard();
+        alert('Khata settled successfully!');
+      }
+    }
+
+    // --- DASHBOARD UPDATER ---
+    function updateDashboard() {
+      let totalSalesToday = sales.reduce((sum, s) => sum + s.total, 0);
+      let totalUdharoDue = customers.reduce((sum, c) => sum + c.udharo, 0);
+
+      document.getElementById('dashTotalSales').innerText = `Rs. ${totalSalesToday}`;
+      document.getElementById('dashTotalUdharo').innerText = `Rs. ${totalUdharoDue}`;
+
+      const salesContainer = document.getElementById('recentSalesList');
+      if(sales.length === 0) {
+        salesContainer.innerHTML = '<p class="text-slate-400 text-center py-4">No sales recorded yet.</p>';
+        return;
+      }
+      salesContainer.innerHTML = sales.slice(0, 5).map(s => `
+        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800">
+          <div>
+            <span class="text-white font-bold">${s.date}</span>
+            <span class="text-slate-400 block">${s.items.length} items sold</span>
+          </div>
+          <span class="font-bold text-emerald-400">Rs. ${s.total}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize initial views on load
+    window.onload = function() {
+      renderInventory();
+      renderCustomers();
+      updateDashboard();
+    };
   </script>
 </body>
 </html>
